@@ -1,0 +1,70 @@
+You are a senior full-stack enterprise developer. Analyze my existing Equipment Master Workflow Portal codebase first, then develop/fix the app end-to-end without rewriting working features.
+
+Project: Equipment Master Request Workflow POC replacing Lotus Notes/Excel format.
+
+Scope:
+Only Equipment Master Creation/Modification.
+
+Roles/Login:
+1. Requester
+2. Approver/Engineering Head
+3. MDM User
+
+Required flow:
+Requester creates request -> selects Approver -> selects MDM in Copy To/CC -> fills Equipment form -> uploads attachment -> submits.
+Request appears in selected Approver pending list and selected MDM view/CC list.
+Approver opens request, verifies all fields/attachments, enters comments, then Accept/Return/Reject.
+If Approver Accepts, request must leave Approver Pending, appear in Approver Approved, and move to MDM Pending.
+MDM opens request, verifies/stores it, then Approve/Return/Reject.
+If MDM Approves, status becomes Completed and must appear in Completed list for Requester, Approver, and MDM.
+
+Fix mandatory bug:
+Currently Approver clicking Approve does not update status and request remains pending. Trace UI button -> API/function -> DB update -> list refresh. Fix status update, audit log, version update, and page refresh.
+
+Statuses:
+Draft
+Submitted_To_Approver
+Returned_By_Approver
+Rejected_By_Approver
+Approved_By_Approver
+Pending_MDM_Review
+Returned_By_MDM
+Rejected_By_MDM
+Completed
+Ready_For_SAP_Sync
+
+Actions:
+SUBMIT_TO_APPROVER
+APPROVER_ACCEPT
+APPROVER_RETURN
+APPROVER_REJECT
+MDM_APPROVE_STORE
+MDM_RETURN
+MDM_REJECT
+SYNC_TO_SAP
+
+Data fields:
+Header:
+plant, comments, attachment, selected_approver, copy_to_mdm
+
+Equipment fields:
+equipment_number, description_of_equipment, equipment_category, equipment_start_up_date, object_type, manufacturer_of_equipment, country_of_manufacture, manufacturer_model_number, manufacturer_serial_number, maintenance_plant, location_of_equipment, room_area, abc_indicator_for_equipment, sort_field, capitalized_asset_number, cost_center
+
+Database must store:
+request_id, requester_id, selected_approver_id, copy_to_mdm_ids, current_owner_role, current_owner_user_id, status, payload, attachments, approver_opinion, approver_comments, mdm_comments, audit_log, change_delta, _version, created_at, updated_at.
+
+Security rules:
+Requester can create/edit own Draft/Returned requests only.
+Assigned Approver can approve only assigned requests.
+Selected/CC MDM can view and MDM approve.
+Completed/Rejected requests are read-only.
+Every mutation must update audit_log and _version.
+Use OCC/expected_version if already implemented.
+
+Pages required:
+Requester Dashboard, Create Request, My Requests, Approver Dashboard, Approver Pending, Approver Approved, MDM Dashboard, MDM Pending, Completed Requests, Request Detail.
+
+Also add SAP next step:
+After MDM approve, prepare sync_to_sap(request_id) placeholder/mock. Do not implement real SAP now. Add status Ready_For_SAP_Sync or Completed based on current app design.
+
+Keep existing working functions unchanged. Modify only necessary files. After implementation, run/test full workflow and summarize changed files.
